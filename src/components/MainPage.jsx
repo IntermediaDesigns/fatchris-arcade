@@ -92,7 +92,7 @@ const MainPage = ({ supabase }) => {
           className="nes-text is-primary text-center"
           style={{ fontSize: "2.5rem", marginBottom: "2rem" }}
         >
-          {attendance === null ? "No Response Yet" : attendance ? "Yes" : "No"}
+          {attendance === null ? "No Answer Yet" : attendance ? "Yes" : "No"}
         </div>
       )}
     </div>
