@@ -38,17 +38,23 @@ const AdminSignIn = ({ supabase }) => {
   const updateAttendance = async (willAttend) => {
     const { error } = await supabase
       .from("attendance")
-      .upsert({ date: new Date().toISOString().split("T")[0], will_attend: willAttend })
+      .upsert({
+        date: new Date().toISOString().split("T")[0],
+        will_attend: willAttend,
+      })
       .eq("date", new Date().toISOString().split("T")[0]);
     if (error) console.error("Error updating attendance:", error);
   };
 
   if (!session) {
     return (
-      <div className="nes-container is-dark with-title min-h-screen flex flex-col justify-center items-center p-4">
-        <h2 className="title">Admin Sign In</h2>
+      <div className="nes-container is-dark with-title h-screen flex flex-col justify-center items-center p-4">
+        <div className="flex flex-col items-center gap-8">
+          <i className="nes-logo"></i>
+          <h2 className="title">Admin Sign In</h2>
+        </div>
         <div className="w-full max-w-xs">
-          <Auth 
+          <Auth
             supabaseClient={supabase}
             appearance={{ theme: ThemeSupa }}
             theme="dark"
@@ -60,7 +66,7 @@ const AdminSignIn = ({ supabase }) => {
   }
 
   return (
-    <div className="nes-container is-dark with-title min-h-screen flex flex-col justify-center items-center">
+    <div className="nes-container is-dark with-title h-screen flex flex-col justify-center items-center">
       <h2 className="title">Admin Dashboard</h2>
       {isAdmin ? (
         <div className="space-y-4 w-full max-w-xs">
@@ -69,19 +75,19 @@ const AdminSignIn = ({ supabase }) => {
               onClick={() => updateAttendance(true)}
               className="nes-btn is-success w-full"
             >
-              Set Today&apos;s Attendance to Yes
+              Yes
             </button>
             <button
               onClick={() => updateAttendance(false)}
               className="nes-btn is-error w-full"
             >
-              Set Today&apos;s Attendance to No
+              No
             </button>
           </div>
           <button
             onClick={() => {
               supabase.auth.signOut();
-              navigate('/');
+              navigate("/");
             }}
             className="nes-btn is-primary w-full"
           >
@@ -89,7 +95,9 @@ const AdminSignIn = ({ supabase }) => {
           </button>
         </div>
       ) : (
-        <p className="nes-text is-error">You don&apos;t have admin privileges.</p>
+        <p className="nes-text is-error">
+          You don&apos;t have admin privileges.
+        </p>
       )}
     </div>
   );
