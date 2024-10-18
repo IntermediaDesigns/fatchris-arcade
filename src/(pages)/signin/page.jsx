@@ -6,44 +6,62 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 const AdminSignIn = ({ supabase }) => {
   const [session, setSession] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      checkAdminStatus(session?.user?.id);
+      if (session?.user?.id) {
+        checkAdminStatus(session.user.id);
+      }
     });
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      checkAdminStatus(session?.user?.id);
+      if (session?.user?.id) {
+        checkAdminStatus(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [supabase]);
 
   const checkAdminStatus = async (userId) => {
-    if (!userId) return;
-    const { data, error } = await supabase
-      .from("admins")
-      .select("is_admin")
-      .eq("user_id", userId)
-      .single();
-    if (error) console.error("Error checking admin status:", error);
-    setIsAdmin(data?.is_admin || false);
+    try {
+      const { data, error } = await supabase
+        .from("admins")
+        .select("is_admin")
+        .eq("user_id", userId)
+        .single();
+
+      if (error) throw error;
+
+      setIsAdmin(data?.is_admin || false);
+    } catch (error) {
+      console.error("Error checking admin status:", error.message);
+      setError("Failed to verify admin status. Please try again.");
+      setIsAdmin(false);
+    }
   };
 
   const updateAttendance = async (willAttend) => {
-    const { error } = await supabase
-      .from("attendance")
-      .upsert({
-        date: new Date().toISOString().split("T")[0],
-        will_attend: willAttend,
-      })
-      .eq("date", new Date().toISOString().split("T")[0]);
-    if (error) console.error("Error updating attendance:", error);
+    try {
+      const { error } = await supabase
+        .from("attendance")
+        .upsert({
+          date: new Date().toISOString().split("T")[0],
+          will_attend: willAttend,
+        })
+        .eq("date", new Date().toISOString().split("T")[0]);
+
+      if (error) throw error;
+    } catch (error) {
+      console.error("Error updating attendance:", error.message);
+      setError("Failed to update attendance. Please try again.");
+    }
   };
 
   if (!session) {
